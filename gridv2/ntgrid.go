@@ -116,7 +116,32 @@ func NtGrid(pol *config.RunPolicyConfig) *strat.TradeStrat {
 						log.Error("平仓失败", zap.Error(err))
 					}
 				}
+			} else if g.GridState != nil {
+				//因为只能onbar执行 所以只能这样判单。但是k线周期得1m
+				openOrders, closeOrders, err := g.GridState.GenGridInfoOrders(true)
+				if err != nil {
+					log.Error("生成网格订单失败", zap.Error(err))
+				}
+				if len(openOrders) > 0 {
+					log.Info("新的开仓单", zap.Any("openOrders", openOrders))
+				}
+				for _, order := range openOrders {
+					err := s.OpenOrder(order)
+					if err != nil {
+						log.Error("开仓失败", zap.Error(err))
+					}
+				}
+				if len(closeOrders) > 0 {
+					log.Info("新的平仓单", zap.Any("closeOrders", closeOrders))
+				}
+				for _, order := range closeOrders {
+					err := s.CloseOrders(order)
+					if err != nil {
+						log.Error("平仓失败", zap.Error(err))
+					}
+				}
 			}
+
 		},
 		OnOrderChange: func(s *strat.StratJob, od *ormo.InOutOrder, chgType int) {
 			g, _ := s.More.(*Grid)
@@ -138,24 +163,24 @@ func NtGrid(pol *config.RunPolicyConfig) *strat.TradeStrat {
 				}
 				g.GridState.UpdateGridInfoByFilledId(filledGridId)
 				log.Info("网格订单完成", zap.Any("filledGridId", filledGridId))
-				openOrders, closeOrders, err := g.GridState.GenGridInfoOrders(true)
-				if err != nil {
-					log.Error("生成网格订单失败", zap.Error(err))
-				}
-				log.Info("新的开仓单", zap.Any("openOrders", openOrders))
-				log.Info("新的平仓单", zap.Any("closeOrders", closeOrders))
-				for _, order := range openOrders {
-					err := s.OpenOrder(order)
-					if err != nil {
-						log.Error("开仓失败", zap.Error(err))
-					}
-				}
-				for _, order := range closeOrders {
-					err := s.CloseOrders(order)
-					if err != nil {
-						log.Error("平仓失败", zap.Error(err))
-					}
-				}
+				// openOrders, closeOrders, err := g.GridState.GenGridInfoOrders(true)
+				// if err != nil {
+				// 	log.Error("生成网格订单失败", zap.Error(err))
+				// }
+				// log.Info("新的开仓单", zap.Any("openOrders", openOrders))
+				// log.Info("新的平仓单", zap.Any("closeOrders", closeOrders))
+				// for _, order := range openOrders {
+				// 	err := s.OpenOrder(order)
+				// 	if err != nil {
+				// 		log.Error("开仓失败", zap.Error(err))
+				// 	}
+				// }
+				// for _, order := range closeOrders {
+				// 	err := s.CloseOrders(order)
+				// 	if err != nil {
+				// 		log.Error("平仓失败", zap.Error(err))
+				// 	}
+				// }
 			}
 		},
 	}

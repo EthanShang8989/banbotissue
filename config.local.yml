@@ -6,7 +6,7 @@ run_policy:
   #   run_timeframes: [15m]  # 运行时间周期
   # params: {upperPrice: 50000, lowerPrice: 100000, gridNum: 20, initAmount: 100}
   - name: gridv2:ntgrid  # 策略名称
-    run_timeframes: [15m]  # 运行时间周期
+    run_timeframes: [1m]  # 运行时间周期
     params: {upperPrice: 100000 , lowerPrice: 50000, gridNum: 20, initAmount: 100}
 accounts:
   user1:
