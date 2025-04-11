@@ -1,0 +1,246 @@
+//网格订单完成的消息
+{
+  "id": 15,
+  "task_id": -1,
+  "symbol": "BTC/USDT:USDT",
+  "sid": 243,
+  "timeframe": "15m",
+  "short": false,
+  "status": 2,
+  "enter_tag": "-1",
+  "init_price": 60526.31578947369,
+  "quote_cost": 100,
+  "exit_tag": "",
+  "leverage": 2,
+  "enter_at": 1719792900000,
+  "exit_at": 0,
+  "strategy": "gridv2:ntgrid",
+  "stg_ver": 0,
+  "max_pft_rate": 0,
+  "max_draw_down": 0,
+  "profit_rate": 0,
+  "profit": 0,
+  "enter": {
+    "id": 0,
+    "task_id": -1,
+    "inout_id": 0,
+    "symbol": "BTC/USDT:USDT",
+    "enter": true,
+    "order_type": "limit",
+    "order_id": "",
+    "side": "buy",
+    "create_at": 1719996714000,
+    "price": 60526.31578947369,
+    "average": 60526.3,
+    "amount": 0.001,
+    "filled": 0.001,
+    "status": 2,
+    "fee": 0.03026315,
+    "fee_type": "USDT",
+    "update_at": 1719996714000
+  },
+  "exit": null,
+  "info": {
+    "LegalCost": 100,
+    "StopAfter": 900001719792000000
+  }
+}
+ 网格订单完成 filledGridId=-1
+ 发送平仓单 closeOrders=
+ [
+  {
+    "Tag": "0",
+    "StratName": "",
+    "EnterTag": "",
+    "Dirt": -1,
+    "OrderType": 0,
+    "Limit": 63157.89473684211,
+    "ExitRate": 1,
+    "Amount": 0,
+    "OrderID": 0,
+    "UnFillOnly": false,
+    "FilledOnly": true,
+    "Force": false
+  }
+]
+//网格订单完成的消息
+{
+  "id": 3,
+  "task_id": -1,
+  "symbol": "BTC/USDT:USDT",
+  "sid": 243,
+  "timeframe": "15m",
+  "short": false,
+  "status": 2,
+  "enter_tag": "-2",
+  "init_price": 57894.73684210527,
+  "quote_cost": 100,
+  "exit_tag": "",
+  "leverage": 2,
+  "enter_at": 1719792900000,
+  "exit_at": 0,
+  "strategy": "gridv2:ntgrid",
+  "stg_ver": 0,
+  "max_pft_rate": 0,
+  "max_draw_down": 0,
+  "profit_rate": 0,
+  "profit": 0,
+  "enter": {
+    "id": 0,
+    "task_id": -1,
+    "inout_id": 0,
+    "symbol": "BTC/USDT:USDT",
+    "enter": true,
+    "order_type": "limit",
+    "order_id": "",
+    "side": "buy",
+    "create_at": 1720058671000,
+    "price": 57894.73684210527,
+    "average": 57894.7,
+    "amount": 0.001,
+    "filled": 0.001,
+    "status": 2,
+    "fee": 0.01157894,
+    "fee_type": "USDT",
+    "update_at": 1720058671000
+  },
+  "exit": null,
+  "info": {
+    "LegalCost": 100,
+    "StopAfter": 900001719792000000
+  }
+}
+chgType = 2
+网格订单完成 filledGridId=-2
+发送平仓单 closeOrders=
+[
+  {
+    "Tag": "-1",
+    "StratName": "",
+    "EnterTag": "",
+    "Dirt": -1,
+    "OrderType": 0,
+    "Limit": 60526.31578947369,
+    "ExitRate": 0,
+    "Amount": 0.0016521739130434781,
+    "OrderID": 0,
+    "UnFillOnly": false,
+    "FilledOnly": true,
+    "Force": true
+  }
+]
+//网格订单完成的消息
+{
+  "id": 10,
+  "task_id": -1,
+  "symbol": "BTC/USDT:USDT",
+  "sid": 243,
+  "timeframe": "15m",
+  "short": false,
+  "status": 2,
+  "enter_tag": "-3",
+  "init_price": 55263.15789473685,
+  "quote_cost": 100,
+  "exit_tag": "",
+  "leverage": 2,
+  "enter_at": 1719792900000,
+  "exit_at": 0,
+  "strategy": "gridv2:ntgrid",
+  "stg_ver": 0,
+  "max_pft_rate": 0,
+  "max_draw_down": 0,
+  "profit_rate": 0,
+  "profit": 0,
+  "enter": {
+    "id": 0,
+    "task_id": -1,
+    "inout_id": 0,
+    "symbol": "BTC/USDT:USDT",
+    "enter": true,
+    "order_type": "limit",
+    "order_id": "",
+    "side": "buy",
+    "create_at": 1720148884000,
+    "price": 55263.15789473685,
+    "average": 55263.2,
+    "amount": 0.001,
+    "filled": 0.001,
+    "status": 2,
+    "fee": 0.01105264,
+    "fee_type": "USDT",
+    "update_at": 1720148884000
+  },
+  "exit": null,
+  "info": {
+    "LegalCost": 100,
+    "StopAfter": 900001719792000000
+  }
+}
+chgType = 2
+网格订单完成 filledGridId=-3
+新的平仓单 closeOrders=
+[
+  {
+    "Tag": "-2",
+    "StratName": "",
+    "EnterTag": "",
+    "Dirt": -1,
+    "OrderType": 0,
+    "Limit": 57894.73684210527,
+    "ExitRate": 0,
+    "Amount": 0.0017272727272727272,
+    "OrderID": 0,
+    "UnFillOnly": false,
+    "FilledOnly": true,
+    "Force": true
+  }
+]
+//网格订单完成的消息 这里就直接跳过之前的平仓单了
+{
+  "id": 1,
+  "task_id": -1,
+  "symbol": "BTC/USDT:USDT",
+  "sid": 243,
+  "timeframe": "15m",
+  "short": true,
+  "status": 2,
+  "enter_tag": "1",
+  "init_price": 65789.47368421053,
+  "quote_cost": 100,
+  "exit_tag": "",
+  "leverage": 2,
+  "enter_at": 1719792900000,
+  "exit_at": 0,
+  "strategy": "gridv2:ntgrid",
+  "stg_ver": 0,
+  "max_pft_rate": 0,
+  "max_draw_down": 0,
+  "profit_rate": 0,
+  "profit": 0,
+  "enter": {
+    "id": 0,
+    "task_id": -1,
+    "inout_id": 0,
+    "symbol": "BTC/USDT:USDT",
+    "enter": true,
+    "order_type": "limit",
+    "order_id": "",
+    "side": "sell",
+    "create_at": 1721178635000,
+    "price": 65789.47368421053,
+    "average": 65789.5,
+    "amount": 0.001,
+    "filled": 0.001,
+    "status": 2,
+    "fee": 0.0131579,
+    "fee_type": "USDT",
+    "update_at": 1721178635000
+  },
+  "exit": null,
+  "info": {
+    "LegalCost": 100,
+    "StopAfter": 900001719792000000
+  }
+}
+chgType = 2
+ 网格订单完成 filledGridId = 1

@@ -1,0 +1,126 @@
+name: ban
+env: dry_run
+leverage: 2
+limit_vol_secs: 5
+put_limit_secs: 120
+account_pull_secs: 60
+market_type: linear
+contract_type: swap
+odbook_ttl: 1000
+concur_num: 2
+order_type: market
+stop_enter_bars: 999999999999
+prefire: 0
+margin_add_rate: 0.66
+stake_amount: 200
+# stake_pct: 10
+max_stake_amt: 500
+min_open_rate: 0.00001
+low_cost_action: ignore
+bt_net_cost: 15
+relay_sim_unfinish: false
+order_bar_max: 500
+ntp_lang_code: none
+time_start: '20230701'
+time_end: '20250101'
+wallet_amounts:
+  USDT: 100000
+stake_currency: [USDT]
+fatal_stop:
+  '1440': 0.1
+  '180': 0.2
+  '30': 0.3
+fatal_stop_hours: 8
+run_timeframes: []
+pairs: []
+run_policy: []
+#pairmgr:
+#  cron: '25 1 0 */2 * *'
+#  offset: 0
+#  limit: 999
+#  force_filters: false
+#  pos_on_rotation: hold
+pairlists:
+  - name: VolumePairList
+    limit: 100
+    limit_rate: 1
+    min_value: 100000
+    cache_secs: 7200
+    back_period: 7d
+  - name: PriceFilter
+    max_unit_value: 100
+    precision: 0.0015
+    min: 0.001
+    max: 100000
+  - name: RateOfChangeFilter
+    back_days: 5
+    min: 0.03
+    max: 10
+    cache_secs: 1440
+  - name: SpreadFilter
+    max_ratio: 0.005
+#  - name: CorrelationFilter
+#    min: -1
+#    max: 1
+#    timeframe: 5m
+#    back_num: 70
+#    sort: asc
+#    top_n: 50
+  - name: VolatilityFilter
+    back_days: 10
+    max: 1
+    min: 0.05
+  - name: AgeFilter
+    min: 180
+  - name: OffsetFilter
+    reverse: false
+    offset: 0
+    rate: 0.5
+    limit: 20
+  - name: ShuffleFilter
+    seed: 42
+exchange:
+  name: binance
+  binance:
+    # proxy: http://127.0.0.1:10808
+    fees:
+      linear:
+        taker: 0.0005
+        maker: 0.0002
+database:
+  retention: all
+  max_pool_size: 50
+  auto_create: true
+  url: postgresql://postgres:123@[127.0.0.1]:5432/ban
+spider_addr: 127.0.0.1:6789
+rpc_channels:
+  wx_notify:
+    corp_id: ww0f12345678b7e
+    agent_id: '1000002'
+    corp_secret: b123456789_1Cx1234YB9K-MuVW1234
+    touser: '@all'
+    type: wework
+    msg_types: [exception]
+    accounts: []
+    keywords: []
+    retry_num: 0
+    retry_delay: 1000
+    disable: true
+webhook:
+  entry:
+    content: "{name} {action}\nSymbol: {pair} {timeframe}\nTag: {strategy}  {enter_tag}\nPrice: {price:.5f}\nCost: {value:.2f}"
+  exit:
+    content: "{name} {action}\nSymbol: {pair} {timeframe}\nTag: {strategy}  {exit_tag}\nPrice: {price:.5f}\nCost: {value:.2f}\nProfit: {profit:.2f}"
+  status:
+    content: '{name}: {status}'
+  exception:
+    content: '{name}: {status}'
+api_server:
+  enabled: false
+  bind_ip: 127.0.0.1
+  port: 8001
+  jwt_secret_key: '123456789'
+  users:
+    - user: ban
+      pwd: '123'
+      acc_roles: {user1: admin}
