@@ -33,7 +33,7 @@ func (gs *GridState) GenerateGridInfos(startPrice, upperPrice, lowerPrice float6
 	if err != nil {
 		return err
 	}
-	err = gs.GenerateGridInfoQty(quoteAmount, 0)
+	err = gs.GenerateGridInfoQty(0, quoteAmount)
 	if err != nil {
 		return err
 	}
@@ -169,8 +169,10 @@ func (gs *GridState) GenerateGridInfoQty(quoteAmount float64, amount float64) er
 	for _, gridInfo := range gs.GridInfos {
 		if quoteAmount != 0 {
 			gridInfo.QuoteAmount = quoteAmount
+			gridInfo.Amount = quoteAmount / gridInfo.Price
 		} else if amount != 0 {
 			gridInfo.Amount = amount
+			gridInfo.QuoteAmount = amount * gridInfo.Price
 		} else {
 			return fmt.Errorf("quoteAmount 和 amount 不能同时为0")
 		}
@@ -197,7 +199,8 @@ func (gs *GridState) GenGridInfoOrders(updateStatus bool) ([]*strat.EnterReq, []
 				order := &strat.EnterReq{}
 				order.Tag = strconv.FormatInt(gridId, 10)
 				order.Limit = gridInfo.Price
-				order.LegalCost = gridInfo.QuoteAmount
+				// order.LegalCost = gridInfo.QuoteAmount
+				order.Amount = gridInfo.QuoteAmount / gridInfo.Price
 				order.OrderType = core.OrderTypeLimit
 				order.Short = gridInfo.Short
 				order.Leverage = 2
@@ -215,18 +218,20 @@ func (gs *GridState) GenGridInfoOrders(updateStatus bool) ([]*strat.EnterReq, []
 				if gridId > 0 {
 					if gridInfo.Short {
 						openPosOrders = append(openPosOrders, &strat.EnterReq{
-							Leverage:  2,
-							Tag:       strconv.FormatInt(gridId, 10),
-							Limit:     gridInfo.Price,
-							LegalCost: gridInfo.QuoteAmount,
+							Leverage: 2,
+							Tag:      strconv.FormatInt(gridId, 10),
+							Limit:    gridInfo.Price,
+							// LegalCost: gridInfo.QuoteAmount,
+							Amount: gridInfo.Amount,
 						})
 					} else {
 						closePosOrders = append(closePosOrders, &strat.ExitReq{
-							Dirt:       core.OdDirtLong,
+							Dirt:       core.OdDirtShort,
 							Tag:        strconv.FormatInt(gridId, 10),
 							Limit:      gridInfo.Price,
-							Amount:     gridInfo.QuoteAmount / gridInfo.Price,
+							Amount:     gridInfo.Amount,
 							FilledOnly: true,
+							Force:      true,
 						})
 					}
 				} else if gridId == 0 {
@@ -237,9 +242,9 @@ func (gs *GridState) GenGridInfoOrders(updateStatus bool) ([]*strat.EnterReq, []
 						log.Error("获取最近成交的网格ID失败", zap.Error(err))
 					}
 					if recentGridId > 0 {
-						dirt = core.OdDirtLong
-					} else {
 						dirt = core.OdDirtShort
+					} else {
+						dirt = core.OdDirtLong
 					}
 					closePosOrders = append(closePosOrders, &strat.ExitReq{
 						Dirt:       dirt,
@@ -252,19 +257,20 @@ func (gs *GridState) GenGridInfoOrders(updateStatus bool) ([]*strat.EnterReq, []
 					//初始价格下方买是开单 卖是平仓
 					if gridInfo.Short {
 						closePosOrders = append(closePosOrders, &strat.ExitReq{
-							Dirt:       core.OdDirtShort,
+							Dirt:       core.OdDirtLong,
 							Tag:        strconv.FormatInt(gridId, 10),
 							Limit:      gridInfo.Price,
-							Amount:     gridInfo.QuoteAmount / gridInfo.Price,
+							Amount:     gridInfo.Amount,
 							FilledOnly: true,
-							Force:      true,
+							// Force:      true,
 						})
 					} else {
 						openPosOrders = append(openPosOrders, &strat.EnterReq{
-							Leverage:  2,
-							Tag:       strconv.FormatInt(gridId, 10),
-							Limit:     gridInfo.Price,
-							LegalCost: gridInfo.QuoteAmount,
+							Leverage: 2,
+							Tag:      strconv.FormatInt(gridId, 10),
+							Limit:    gridInfo.Price,
+							// LegalCost: gridInfo.QuoteAmount,
+							Amount: gridInfo.Amount,
 						})
 					}
 				}

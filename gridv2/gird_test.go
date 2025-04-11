@@ -13,7 +13,26 @@ func TestGenerateGridInfoPirce(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	gs.GenGridInfoOrders(true)
+	_, _, err = gs.GenGridInfoOrders(true)
+	if err != nil {
+		t.Fatal(err)
+	}
+	err = gs.UpdateGridInfoByFilledId(-2)
+	if err != nil {
+		t.Fatal(err)
+	}
+	_, _, err = gs.GenGridInfoOrders(true)
+	if err != nil {
+		t.Fatal(err)
+	}
+	err = gs.UpdateGridInfoByFilledId(-3)
+	if err != nil {
+		t.Fatal(err)
+	}
+	err = gs.UpdateGridInfoByFilledId(-2)
+	if err != nil {
+		t.Fatal(err)
+	}
 	err = gs.UpdateGridInfoByFilledId(-2)
 	if err != nil {
 		t.Fatal(err)

@@ -84,7 +84,7 @@ func NtGrid(pol *config.RunPolicyConfig) *strat.TradeStrat {
 		OnBar: func(s *strat.StratJob) {
 			g, _ := s.More.(*Grid)
 			// log.Info("onbar...")
-			if g.GridState == nil {
+			if g.GridState == nil && !s.IsWarmUp {
 				log.Info("初始化网格状态", zap.String("symbol", s.Symbol.Symbol))
 				g.GridState = NewGridState(s.Env.Close.Get(0), upperPrice, lowerPrice, int64(gridNum), initQuoteAmount, s.Symbol.Symbol)
 				openOrders, closeOrders, err := g.GridState.GenGridInfoOrders(true)
@@ -97,18 +97,23 @@ func NtGrid(pol *config.RunPolicyConfig) *strat.TradeStrat {
 				for _, grid := range grids {
 					log.Info("网格信息:", zap.Int64("序号", grid.Index),
 						zap.Float64("价格", grid.Info.Price),
-						zap.Bool("方向", grid.Info.Short))
+						zap.Bool("方向", grid.Info.Short),
+						zap.Float64("数量", grid.Info.Amount))
 				}
 				if err != nil {
 					log.Error("生成网格订单失败", zap.Error(err))
 				}
-				log.Info("openOrders", zap.Any("openOrders", openOrders))
-				log.Info("closeOrders", zap.Any("closeOrders", closeOrders))
+				if len(openOrders) > 0 {
+					log.Info("openOrders", zap.Any("openOrders", openOrders))
+				}
 				for _, order := range openOrders {
 					err := s.OpenOrder(order)
 					if err != nil {
 						log.Error("开仓失败", zap.Error(err))
 					}
+				}
+				if len(closeOrders) > 0 {
+					log.Info("closeOrders", zap.Any("closeOrders", closeOrders))
 				}
 				for _, order := range closeOrders {
 					err := s.CloseOrders(order)
@@ -123,7 +128,33 @@ func NtGrid(pol *config.RunPolicyConfig) *strat.TradeStrat {
 					log.Error("生成网格订单失败", zap.Error(err))
 				}
 				if len(openOrders) > 0 {
-					log.Info("新的开仓单", zap.Any("openOrders", openOrders))
+					log.Info("新的开仓单", zap.Any("GridID", openOrders[0].Tag), zap.Any("Amount", openOrders[0].Amount), zap.Any("Price", openOrders[0].Limit))
+					log.Info("新的开仓单详情", zap.Any("openOrders", openOrders))
+				}
+
+				if len(openOrders) != 0 || len(closeOrders) != 0 {
+					log.Info("当前未完成订单数量", zap.Any("OrderNum", s.OrderNum))
+					// 在K线周期内更新止损
+					log.Info("当前LongOrders止盈止损信息")
+					for _, od := range s.LongOrders {
+						// 获取当前止损信息
+						currentStopLoss := od.GetStopLoss()
+						currentProfit := od.GetTakeProfit()
+						log.Info("当前止损信息", zap.Any("currentStopLoss", currentStopLoss), zap.Any("currentProfit", currentProfit))
+					}
+					log.Info("当前ShortOrders止盈止损信息")
+					for _, od := range s.ShortOrders {
+						// 获取当前止损信息
+						currentStopLoss := od.GetStopLoss()
+						currentProfit := od.GetTakeProfit()
+						log.Info("当前止损信息", zap.Any("currentStopLoss", currentStopLoss), zap.Any("currentProfit", currentProfit))
+					}
+					log.Info("当前做空单数量", zap.Any("ShortOrders", len(s.GetOrders(-1))))
+					log.Info("当前做多开仓单情况", zap.Any("AllOrders", s.GetOrders(1)))
+					log.Info("当前做空开仓单情况", zap.Any("AllOrders", s.GetOrders(-1)))
+					log.Info("", zap.Any("s.Entrys", s.Entrys))
+					log.Info("", zap.Any("s.Exits", s.Exits))
+					log.Info("当前账户余额情况", zap.Any("Position", s.Position(0, "")))
 				}
 				for _, order := range openOrders {
 					err := s.OpenOrder(order)
@@ -132,7 +163,8 @@ func NtGrid(pol *config.RunPolicyConfig) *strat.TradeStrat {
 					}
 				}
 				if len(closeOrders) > 0 {
-					log.Info("新的平仓单", zap.Any("closeOrders", closeOrders))
+					log.Info("新的平仓单", zap.Any("GridID", closeOrders[0].Tag), zap.Any("Amount", closeOrders[0].Amount), zap.Any("Price", closeOrders[0].Limit))
+					log.Info("新的平仓单详情", zap.Any("closeOrders", closeOrders))
 				}
 				for _, order := range closeOrders {
 					err := s.CloseOrders(order)
@@ -141,28 +173,32 @@ func NtGrid(pol *config.RunPolicyConfig) *strat.TradeStrat {
 					}
 				}
 			}
-
 		},
 		OnOrderChange: func(s *strat.StratJob, od *ormo.InOutOrder, chgType int) {
 			g, _ := s.More.(*Grid)
 			log.Info("onorderchange", zap.Any("od", od), zap.Int("chgType", chgType))
+
 			switch chgType {
 			case strat.OdChgEnterFill, strat.OdChgExitFill:
 				var filledGridId int64
+				var Amount float64
 				var err error
 				if chgType == strat.OdChgEnterFill {
 					filledGridId, err = strconv.ParseInt(od.EnterTag, 10, 64)
 					if err != nil {
 						log.Error("转换网格ID失败", zap.Error(err))
 					}
+					Amount = od.Enter.Amount
 				} else {
 					filledGridId, err = strconv.ParseInt(od.ExitTag, 10, 64)
 					if err != nil {
 						log.Error("转换网格ID失败", zap.Error(err))
 					}
+					Amount = od.Exit.Amount
 				}
 				g.GridState.UpdateGridInfoByFilledId(filledGridId)
-				log.Info("网格订单完成", zap.Any("filledGridId", filledGridId))
+
+				log.Info("网格订单完成", zap.Any("filledGridId", filledGridId), zap.Any("Amount", Amount))
 				// openOrders, closeOrders, err := g.GridState.GenGridInfoOrders(true)
 				// if err != nil {
 				// 	log.Error("生成网格订单失败", zap.Error(err))
@@ -181,6 +217,28 @@ func NtGrid(pol *config.RunPolicyConfig) *strat.TradeStrat {
 				// 		log.Error("平仓失败", zap.Error(err))
 				// 	}
 				// }
+			case strat.OdChgEnter, strat.OdChgExit:
+				// 在K线周期内更新止损
+				log.Info("OnOrderChange当前LongOrders止盈止损信息")
+				for _, od := range s.LongOrders {
+					// 获取当前止损信息
+					currentStopLoss := od.GetStopLoss()
+					currentProfit := od.GetTakeProfit()
+					log.Info("当前止损信息", zap.Any("EnterTag", od.EnterTag), zap.Any("currentStopLoss", currentStopLoss), zap.Any("currentProfit", currentProfit))
+				}
+				log.Info("OnOrderChange当前ShortOrders止盈止损信息")
+				for _, od := range s.ShortOrders {
+					// 获取当前止损信息
+					currentStopLoss := od.GetStopLoss()
+					currentProfit := od.GetTakeProfit()
+					log.Info("当前止损信息", zap.Any("EnterTag", od.EnterTag), zap.Any("currentStopLoss", currentStopLoss), zap.Any("currentProfit", currentProfit))
+				}
+				log.Info("当前做空单数量", zap.Any("ShortOrders", len(s.GetOrders(-1))))
+				// log.Info("当前做多开仓单情况", zap.Any("AllOrders", s.GetOrders(1)))
+				// log.Info("当前做空开仓单情况", zap.Any("AllOrders", s.GetOrders(-1)))
+				log.Info("", zap.Any("s.Entrys", s.Entrys))
+				log.Info("", zap.Any("s.Exits", s.Exits))
+				log.Info("当前账户余额情况", zap.Any("Position", s.Position(0, "")))
 			}
 		},
 	}
